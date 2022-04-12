@@ -1,0 +1,86 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#container {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#calculator {
+    width: 400px;
+    background-color: black;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    border-radius: 3%;
+    height: 500px;
+    color: white;
+    column-gap: 5px;
+}
+
+#display {
+    display: flex;
+    background-color: rgb(165, 182, 171);
+    color: rgb(31, 31, 31);
+    grid-column-start: 1;
+    grid-column-end: end;
+    grid-row-start: 2;
+    font-size: 40px;
+    justify-content: flex-end;
+    margin: 5px;
+    align-items: center;
+    height: 80px;
+}
+
+#calculator h3 {
+    grid-column-start: 1;
+    grid-column-end: end;
+    text-align: center;
+}
+
+/*$######################## 
+######### BUTTONS #########
+#########################*/
+
+.btn {
+    background-color: aliceblue;
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    border-radius: 15%;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+
+/*$######################## 
+### VERTICAL ALIGN BTNS ###
+#########################*/
+
+.operator {
+    grid-column-start: 5;
+}
+
+.num-9, .num-6,
+.num-3, #invertSignal {
+    grid-column: 4;
+}
+
+.num-8, .num-5,
+.num-2, .num-point {
+    grid-column: 3;
+}
+
+.num-7, .num-4,
+.num-1, .num-0 {
+    grid-column: 2;
+}
