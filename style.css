@@ -5,6 +5,11 @@ body {
     padding: 0;
 }
 
+/* 
+    Maybe was better to use grid to order the page layout
+    and flex on calc buttons =/ but for now it's ok
+ */
+
 #container {
     display: flex;
     height: 100%;
