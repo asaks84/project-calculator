@@ -1,28 +1,19 @@
 const display = document.querySelector("#display")
 const calcButtons = document.querySelectorAll(".btn");
 const dataCalculator = {};
-const displayLimit = 15;
+const displayLimit = 12;
 
 let hasOperated = false;
 let lastClick = '';
 
-/*###########################
-###### MATH OPERATIONS ######
-###### & CALC FUNCTION ######
-###########################*/
 
-function add(a, b) {
-    return (a + b);
-};
-function subtract(a, b) {
-    return (a - b);
-};
-function multiply(a, b) {
-    return (a * b);
-};
-function divide(a, b) {
-    return (a / b);
-};
+
+// ###### MATH OPERATIONS & CALC FUNCTION ######
+
+const add = (a, b) => (a + b);
+const subtract = (a, b) => (a - b);
+const multiply = (a, b) => (a * b);
+const divide = (a, b) => (a / b);
 
 function operate() {
     // Don't execute operations without 2 numbers
@@ -39,30 +30,30 @@ function operate() {
     hasOperated = true;
 
     // set result digits limit
-    while (dataCalculator.result.toString().length > displayLimit){
+    while (dataCalculator.result.toString().length > displayLimit) {
         dataCalculator.result = backspace(dataCalculator.result);
     };
 
     printOnDisplay(dataCalculator.result);
 };
 
-/*###########################
-#### VERIFICATION TESTS #####
-###########################*/
+
+
+// #### VERIFICATION TESTS #####
 
 const isNumberRegistred = () => (displayContent() == dataCalculator.number1);
 const isDisplayLimit = (data) => ((displayContent() + data).length > displayLimit);
 const isSameOperator = (last, curr) => last == curr;
+const identifyElement = (str, data) => str.toString().indexOf(`${data}`);
 
-const isLastDataOperator = (last, current) => {
+function isLastDataOperator(last, current) {
     if (!last) return false;
     return last.classList.contains('operator') && current.classList.contains('operator');
 };
-const haveDot = () => displayContent().toString().indexOf('.');
 
-/*###########################
-### BACKGROUND FUNCTIONS ####
-###########################*/
+
+
+//### BACKGROUND FUNCTIONS ####
 
 function insertData() {
     if (!dataCalculator.number1) {
@@ -73,15 +64,30 @@ function insertData() {
     operate()
 };
 
-const displayContent = () => display.textContent;
-
-/*###########################
-##### DISPLAY FUNCTIONS #####
-###########################*/
-
 function clearData() {
     Object.keys(dataCalculator).forEach(key => delete dataCalculator[key])
 };
+
+function calcPercentage() {
+    printOnDisplay(displayContent() / 100);
+};
+
+// Invert Signal
+const addSignal = (data) => data = "-" + displayContent();
+const removeSignal = (data) => data.slice(1);
+
+function invertSignal() {
+    let displayStr = displayContent();
+    if(identifyElement(displayStr, '-') == '-1'){
+        printOnDisplay(addSignal(displayStr));
+    } else printOnDisplay(removeSignal(displayStr));
+};
+
+
+
+// ##### DISPLAY FUNCTIONS #####
+
+const displayContent = () => display.textContent;
 
 function clearDisplay() {
     printOnDisplay();
@@ -95,17 +101,17 @@ function backspace(str) {
 function printOnDisplay(data) {
     if (!data) data = '';
     display.textContent = data;
-}
+};
 
-/*###########################
-####### MAIN FUNCTION #######
-###########################*/
+
+
+// ####### MAIN FUNCTION #######
 
 function calculator(clicked) {
     const btnClicked = clicked.target.getAttribute('data-value');
     const btn = clicked.target;
 
-    // clear all data and display
+    // clear 
     if (btnClicked == 'clear') {
         clearDisplay();
         clearData();
@@ -113,7 +119,7 @@ function calculator(clicked) {
     };
 
     // backspace and if it's operated, backspace will clear display only
-    if(btnClicked == 'backspace' && hasOperated == true){
+    if (btnClicked == 'backspace' && hasOperated == true) {
         clearDisplay();
         return
     } else if (btnClicked == 'backspace') {
@@ -122,11 +128,16 @@ function calculator(clicked) {
     };
 
     // percentage
+    if (btnClicked == '%') {
+        calcPercentage()
+        return
+    }
 
-    //if it's Pi, clear display first
-    if (btn.classList.contains('pi')) {
-        clearDisplay();
-    };   
+    // invert Signal
+    if (btnClicked == 'invert') {
+        invertSignal();
+        return
+    };
 
     // operator functions
     // change operation signal and don't operate
@@ -143,9 +154,8 @@ function calculator(clicked) {
     };
 
     // do not input more than 1 dot.
-    if(btnClicked == '.'){
-        console.log(haveDot())
-        if(haveDot() != '-1'){
+    if (btnClicked == '.') {
+        if (identifyElement(displayContent(),".") != '-1') {
             return
         };
     };
@@ -167,5 +177,16 @@ function calculator(clicked) {
         hasOperated = false;
     };
 };
+
+// ####### Using keyboard #######
+// Need to block the browser shortcuts control before start this
+//
+// function controls(e) {
+//     const control = document.querySelector(`div[data-key="${e.keyCode}"]`);
+//     console.log(e.key, control);
+//     if (!control) return;
+//     control.click();
+// };
+//window.addEventListener('keydown', controls);
 
 calcButtons.forEach(e => e.addEventListener('click', calculator));
