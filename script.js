@@ -1,17 +1,14 @@
-// Create a new function operate that takes an operator and 2 numbers 
-// and then calls one of the above functions on the numbers.
-
 const display = document.querySelector("#display")
 const calcButtons = document.querySelectorAll(".btn");
 const dataCalculator = {};
+const displayLimit = 15;
+
+let hasOperated = false;
 let lastClick = '';
 
-
 /*###########################
-
 ###### MATH OPERATIONS ######
 ###### & CALC FUNCTION ######
-
 ###########################*/
 
 function add(a, b) {
@@ -28,109 +25,147 @@ function divide(a, b) {
 };
 
 function operate() {
-    if((!dataCalculator.number1) || (!dataCalculator.number2)) return
-    
-    if(dataCalculator.operator == "+") dataCalculator.result = add(dataCalculator.number1, dataCalculator.number2);
-    if(dataCalculator.operator == "-") dataCalculator.result = subtract(dataCalculator.number1, dataCalculator.number2);
-    if(dataCalculator.operator == "/") dataCalculator.result = divide(dataCalculator.number1, dataCalculator.number2);
-    if(dataCalculator.operator == "*") dataCalculator.result = multiply(dataCalculator.number1, dataCalculator.number2);
+    // Don't execute operations without 2 numbers
+    if ((!dataCalculator.number1) || (!dataCalculator.number2)) return
 
+    if (dataCalculator.operation == "+") dataCalculator.result = add(dataCalculator.number1, dataCalculator.number2);
+    if (dataCalculator.operation == "-") dataCalculator.result = subtract(dataCalculator.number1, dataCalculator.number2);
+    if (dataCalculator.operation == "/") dataCalculator.result = divide(dataCalculator.number1, dataCalculator.number2);
+    if (dataCalculator.operation == "*") dataCalculator.result = multiply(dataCalculator.number1, dataCalculator.number2);
+
+    // continue operating after a result
     dataCalculator.number1 = dataCalculator.result;
     delete dataCalculator.number2;
-    
-    display.textContent = dataCalculator.result;
+    hasOperated = true;
+
+    // set result digits limit
+    while (dataCalculator.result.toString().length > displayLimit){
+        dataCalculator.result = backspace(dataCalculator.result);
+    };
+
+    printOnDisplay(dataCalculator.result);
 };
 
 /*###########################
-
 #### VERIFICATION TESTS #####
-
 ###########################*/
 
-const goToOperate = () => (number1 in dataCalculator && number2 in dataCalculator && operator in dataCalculator);
-
-const isdisplayPopulated = () => (display.textContent == dataCalculator.number1);
-const isDisplayLimit = (value) => ((display.textContent + value).length > 12);
+const isNumberRegistred = () => (displayContent() == dataCalculator.number1);
+const isDisplayLimit = (data) => ((displayContent() + data).length > displayLimit);
 const isSameOperator = (last, curr) => last == curr;
 
 const isLastDataOperator = (last, current) => {
-    if(!last) return false;
+    if (!last) return false;
     return last.classList.contains('operator') && current.classList.contains('operator');
 };
+const haveDot = () => displayContent().toString().indexOf('.');
 
 /*###########################
-
 ### BACKGROUND FUNCTIONS ####
-
 ###########################*/
 
-
-function insertData(value){
-    if(!dataCalculator.number1) {
-        dataCalculator.number1 = Number(display.textContent);
+function insertData() {
+    if (!dataCalculator.number1) {
+        dataCalculator.number1 = Number(displayContent());
     } else {
-        dataCalculator.number2 = Number(display.textContent);
+        dataCalculator.number2 = Number(displayContent());
     };
-
-    if(!goToOperate) {
-        return
-    } else operate();
+    operate()
 };
 
+const displayContent = () => display.textContent;
+
 /*###########################
-
 ##### DISPLAY FUNCTIONS #####
-
 ###########################*/
 
 function clearData() {
     Object.keys(dataCalculator).forEach(key => delete dataCalculator[key])
 };
 
-function clearDisplay(){
-    clearData();
-    display.textContent = '';
+function clearDisplay() {
+    printOnDisplay();
 };
 
-function backspace() {
-    display.textContent = display.textContent.slice(0,-1);
+function backspace(str) {
+    if (!str) str = displayContent()
+    return str.toString().slice(0, -1);
 };
 
-function populate(clicked){
+function printOnDisplay(data) {
+    if (!data) data = '';
+    display.textContent = data;
+}
+
+/*###########################
+####### MAIN FUNCTION #######
+###########################*/
+
+function calculator(clicked) {
     const btnClicked = clicked.target.getAttribute('data-value');
     const btn = clicked.target;
 
-    if( isLastDataOperator(lastClick, btn) && isSameOperator(lastClick, btn) == false ) {
-        dataCalculator.operator = btnClicked;
+    // clear all data and display
+    if (btnClicked == 'clear') {
+        clearDisplay();
+        clearData();
+        return
+    };
+
+    // backspace and if it's operated, backspace will clear display only
+    if(btnClicked == 'backspace' && hasOperated == true){
+        clearDisplay();
+        return
+    } else if (btnClicked == 'backspace') {
+        printOnDisplay(backspace());
+        return
+    };
+
+    // percentage
+
+    //if it's Pi, clear display first
+    if (btn.classList.contains('pi')) {
+        clearDisplay();
+    };   
+
+    // operator functions
+    // change operation signal and don't operate
+    if (isLastDataOperator(lastClick, btn) && isSameOperator(lastClick, btn) == false) {
+        dataCalculator.operation = btnClicked;
         return
     };
     lastClick = btn;
 
-    if( btnClicked == 'clear' ){
-        clearDisplay();
-        return
-    };
-    if(btnClicked == 'backspace'){
-        backspace();
-        return
-    };
-
-    if(btn.classList.contains('operator')){ 
+    if (btn.classList.contains('operator')) {
         insertData(btnClicked);
-        dataCalculator.operator = btnClicked;
+        dataCalculator.operation = btnClicked;
         return
     };
 
-    if(isdisplayPopulated()){
-        display.textContent ="";
+    // do not input more than 1 dot.
+    if(btnClicked == '.'){
+        console.log(haveDot())
+        if(haveDot() != '-1'){
+            return
+        };
     };
 
-    if(isDisplayLimit(btnClicked)) return
-
-    if(btnClicked === "result") {
+    // the equal button function
+    if (btnClicked === "result") {
         insertData(btnClicked);
         clearData();
-    } else display.textContent += btnClicked;
+    } else {
+        // clear display to insert new numbers after operated
+        if (isNumberRegistred() || hasOperated == true) {
+            printOnDisplay();
+        };
+
+        // don't add more digits than display limit number
+        if (isDisplayLimit(btnClicked)) return
+
+        printOnDisplay(displayContent() + btnClicked);
+        hasOperated = false;
+    };
 };
 
-calcButtons.forEach(e => e.addEventListener('click', populate));
+calcButtons.forEach(e => e.addEventListener('click', calculator));
