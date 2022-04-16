@@ -1,7 +1,7 @@
 const display = document.querySelector("#display")
 const calcButtons = document.querySelectorAll(".btn");
 const dataCalculator = {};
-const displayLimit = 12;
+const displayLimit = 10;
 
 let hasOperated = false;
 let lastClick = '';
